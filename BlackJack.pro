@@ -10,7 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     card.cpp \
-    cardanimation.cpp \
+    dealer.cpp \
     deck.cpp \
     gamewindow.cpp \
     main.cpp \
@@ -18,7 +18,7 @@ SOURCES += \
 
 HEADERS += \
     card.h \
-    cardanimation.h \
+    dealer.h \
     deck.h \
     gamewindow.h \
     player.h

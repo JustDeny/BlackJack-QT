@@ -3,8 +3,10 @@
 
 
 #include <QGridLayout>
-#include <deck.h>
+#include <QTimer>
+#include "deck.h"
 #include "card.h"
+#include <QPropertyAnimation>
 
 
 class Player
@@ -17,9 +19,10 @@ private:
     int score;
     int balance;
     int ace_count;
-    QWidget grid_widget;
-    QGridLayout card_grid;
+    const QPoint player_deck_pos = QPoint(80,300); //it's where first card will be placed and acordingly next ones will be in line
     std::shared_ptr<Deck> common_deck;
+    QPropertyAnimation* animation;
+    bool in_progress = false;
 };
 
 #endif // PLAYER_H

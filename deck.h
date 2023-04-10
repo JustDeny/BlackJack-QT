@@ -12,7 +12,6 @@ public:
     Card TakeCard();
 private:
     QList<Card> cards;
-    void initCards();
 };
 
 #endif // DECK_H

@@ -8,11 +8,16 @@ void GameWindow::loadImages()
 }
 
 GameWindow::GameWindow(QWidget *parent)
-    : QWidget{parent}, deck{std::make_shared<Deck>(this)}, player{this,deck}
+    : QWidget{parent}, deck{std::make_shared<Deck>(this)}, player{this,deck},
+      hitButton{"Hit",this}, standButton{"Stand", this}
 {
     resize(W_WIDTH,W_HEIGHT);
     loadImages();
-
+    hitButton.setFixedSize(70,30);
+    hitButton.move(520,250);
+    standButton.setFixedSize(70,30);
+    standButton.move(610,250);
+    connect(&hitButton, &QPushButton::clicked, this, &GameWindow::onHitButtonClicked);
 }
 
 void GameWindow::Draw()
@@ -21,6 +26,11 @@ void GameWindow::Draw()
     qp.drawImage(0,0,m_backgroundImage);
     //deck->Draw(qp);
 
+}
+
+void GameWindow::onHitButtonClicked()
+{
+    player.hit();
 }
 
 void GameWindow::paintEvent(QPaintEvent *e)

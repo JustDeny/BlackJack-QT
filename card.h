@@ -12,7 +12,7 @@ class Card : public QLabel
     Q_OBJECT
    public:
        explicit Card(QWidget* parent);
-       explicit Card(Suit suit, Rank rank, QWidget *parent = nullptr);
+       explicit Card(Suit suit, Rank rank, QPoint pos, QWidget *parent = nullptr);
        Card(const Card& other);
        Card(Card&& other);
        Card& operator=(const Card& card);
@@ -29,12 +29,16 @@ class Card : public QLabel
 
        static QPixmap getCardImage(Suit suit, Rank rank);
 
-   private:
+       int getCardWidth() const;
+       int getCardHeight() const;
+
+private:
        Suit m_suit;
        Rank m_rank;
        bool m_faceUp;
        QPixmap frontTexture;
-
+       int card_width;
+       int card_height;
        //QPixmap BackTexture;
 };
 

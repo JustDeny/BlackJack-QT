@@ -1,14 +1,20 @@
 #include "card.h"
 
+#include <QGraphicsDropShadowEffect>
+
 Card::Card(QWidget *parent)
 {
     setAutoFillBackground(false);
 }
 
-Card::Card(Suit suit, Rank rank, QWidget *parent) : QLabel(parent), m_suit(suit), m_rank(rank), m_faceUp(false)
+Card::Card(Suit suit, Rank rank,QPoint pos, QWidget *parent) : QLabel(parent), m_suit(suit), m_rank(rank), m_faceUp(false)
 {
     frontTexture = getCardImage(suit, rank);
     setPixmap(frontTexture);
+    card_width = pixmap().width();
+    card_height = pixmap().height();
+    move(pos);
+    setStyleSheet("border: 1px solid grey");
 }
 
 Card::Card(const Card &other)
@@ -20,6 +26,9 @@ Card::Card(const Card &other)
     m_faceUp = other.m_faceUp;
     frontTexture = other.frontTexture;
     setPixmap(frontTexture);
+    card_width= other.card_width;
+    card_height=other.card_height;
+    move(other.pos());
 }
 
 Card::Card(Card &&other)
@@ -31,7 +40,9 @@ Card::Card(Card &&other)
     m_faceUp = other.m_faceUp;
     frontTexture = other.frontTexture;
     setPixmap(frontTexture);
-
+    card_width= other.card_width;
+    card_height=other.card_height;
+    move(other.pos());
 }
 
 Card &Card::operator=(const Card &other)
@@ -43,6 +54,9 @@ Card &Card::operator=(const Card &other)
     m_faceUp = other.m_faceUp;
     frontTexture = other.frontTexture;
     setPixmap(frontTexture);
+    card_width= other.card_width;
+    card_height=other.card_height;
+    move(other.pos());
 }
 
 void Card::setSuit(Suit suit)
@@ -147,4 +161,14 @@ QPixmap Card::getCardImage(Suit suit, Rank rank)
     pixmap = pixmap.scaled(pixmap.width() * 1.5, pixmap.height() * 1.5,Qt::KeepAspectRatio, Qt::SmoothTransformation);
     //std::cout << pixmap.width() << " " <<pixmap.height() << std::endl;
     return pixmap;
+}
+
+int Card::getCardWidth() const
+{
+    return card_width;
+}
+
+int Card::getCardHeight() const
+{
+    return card_height;
 }

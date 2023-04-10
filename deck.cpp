@@ -6,7 +6,7 @@ Deck::Deck(QWidget* parent)
     for (int suit = 0; suit  < 4; ++suit ) {
         for (int rank = 0; rank < 13; ++rank) {
             cards.append(Card{static_cast<Suit>(suit),
-                          static_cast<Rank>(rank)});
+                          static_cast<Rank>(rank),QPoint(562,6),parent});
         }
     }
 }
