@@ -9,7 +9,7 @@ void GameWindow::loadImages()
 
 GameWindow::GameWindow(QWidget *parent)
     : QWidget{parent}, deck{std::make_shared<Deck>(this)}, player{this,deck},
-      hitButton{"Hit",this}, standButton{"Stand", this}
+      dealer{this,deck}, hitButton{"Hit",this}, standButton{"Stand", this}
 {
     resize(W_WIDTH,W_HEIGHT);
     loadImages();
@@ -17,7 +17,15 @@ GameWindow::GameWindow(QWidget *parent)
     hitButton.move(520,250);
     standButton.setFixedSize(70,30);
     standButton.move(610,250);
+    timer.setInterval(500);
     connect(&hitButton, &QPushButton::clicked, this, &GameWindow::onHitButtonClicked);
+    connect(&timer, &QTimer::timeout, this, &GameWindow::timerTimeout);
+}
+
+void GameWindow::Init()
+{
+    player.Init();
+    dealer.Init();
 }
 
 void GameWindow::Draw()
@@ -30,7 +38,7 @@ void GameWindow::Draw()
 
 void GameWindow::onHitButtonClicked()
 {
-    player.hit();
+    timer.start();
 }
 
 void GameWindow::paintEvent(QPaintEvent *e)
@@ -38,4 +46,10 @@ void GameWindow::paintEvent(QPaintEvent *e)
     Q_UNUSED(e);
 
      Draw();
+}
+
+void  GameWindow::timerTimeout()
+{
+   player.hit();
+   timer.stop();
 }

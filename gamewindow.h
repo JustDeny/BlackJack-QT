@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QPushButton>
-#include "card.h"
+#include "dealer.h"
 #include "deck.h"
 #include "player.h"
 
@@ -19,13 +19,17 @@ private:
     bool initGame();
     std::shared_ptr<Deck> deck;
     Player player;
+    Dealer dealer;
     QPushButton hitButton;
     QPushButton standButton;
+    QTimer timer;
 public:
     explicit GameWindow(QWidget *parent = nullptr);
+    void Init();
     void Draw();
 public slots:
     void onHitButtonClicked();
+    void timerTimeout();
 protected:
     void paintEvent(QPaintEvent *e) override;
 
