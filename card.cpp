@@ -7,42 +7,30 @@ Card::Card(QWidget *parent)
     setAutoFillBackground(false);
 }
 
-Card::Card(Suit suit, Rank rank,QPoint pos, QWidget *parent) : QLabel(parent), m_suit(suit), m_rank(rank), m_faceUp(false)
+Card::Card(Suit suit, Rank rank,QPoint pos, QWidget *parent) :
+    QLabel(parent), m_suit(suit), m_rank(rank), m_faceUp(false)
 {
     frontTexture = getCardImage(suit, rank);
-    setPixmap(frontTexture);
+    backTexture.load("../BlackJack/images/cards/backcard.png");
+    backTexture= backTexture.scaled(backTexture.width() * 1.5, backTexture.height() * 1.5,Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    setPixmap(backTexture);
     card_width = pixmap().width();
     card_height = pixmap().height();
     move(pos);
     setStyleSheet("border: 1px solid grey");
+    is_ace = rank==Rank::Ace?true:false;
+    QWidget qw;
+
 }
 
 Card::Card(const Card &other)
 {
-    setParent(other.parentWidget());
-    setText(other.text());
-    m_suit=other.m_suit;
-    m_rank = other.m_rank;
-    m_faceUp = other.m_faceUp;
-    frontTexture = other.frontTexture;
-    setPixmap(frontTexture);
-    card_width= other.card_width;
-    card_height=other.card_height;
-    move(other.pos());
+    *this = other;
 }
 
 Card::Card(Card &&other)
 {
-    setParent(other.parentWidget());
-    setText(other.text());
-    m_suit=other.m_suit;
-    m_rank = other.m_rank;
-    m_faceUp = other.m_faceUp;
-    frontTexture = other.frontTexture;
-    setPixmap(frontTexture);
-    card_width= other.card_width;
-    card_height=other.card_height;
-    move(other.pos());
+    *this = other;
 }
 
 Card &Card::operator=(const Card &other)
@@ -53,10 +41,12 @@ Card &Card::operator=(const Card &other)
     m_rank = other.m_rank;
     m_faceUp = other.m_faceUp;
     frontTexture = other.frontTexture;
-    setPixmap(frontTexture);
+    backTexture = other.backTexture;
+    setPixmap(backTexture);
     card_width= other.card_width;
     card_height=other.card_height;
     move(other.pos());
+    is_ace=other.is_ace;
 }
 
 void Card::setSuit(Suit suit)
@@ -75,17 +65,23 @@ void Card::setRank(Rank rank)
 
 void Card::setFaceUp(bool faceUp)
 {
-    m_faceUp = faceUp;
-    frontTexture = getCardImage(m_suit, m_rank);
     if (!m_faceUp) {
-        frontTexture = frontTexture.transformed(QTransform().rotate(180));
+        setPixmap(frontTexture);
     }
-    setPixmap(frontTexture);
+    else{
+        setPixmap(backTexture);
+    }
+    m_faceUp = faceUp;
 }
 
 const QPixmap Card::getFrontTexturePixmap() const
 {
     return frontTexture;
+}
+
+bool Card::isAce() const
+{
+    return is_ace;
 }
 
 QPixmap Card::getCardImage(Suit suit, Rank rank)
@@ -159,7 +155,6 @@ QPixmap Card::getCardImage(Suit suit, Rank rank)
     QPixmap pixmap;
     pixmap.load(filename);
     pixmap = pixmap.scaled(pixmap.width() * 1.5, pixmap.height() * 1.5,Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    //std::cout << pixmap.width() << " " <<pixmap.height() << std::endl;
     return pixmap;
 }
 
@@ -171,4 +166,14 @@ int Card::getCardWidth() const
 int Card::getCardHeight() const
 {
     return card_height;
+}
+
+int Card::getCardValue() const
+{
+    if(is_ace){
+        return 11;
+    }
+    if(static_cast<int>(m_rank) > static_cast<int>(Rank::Ten))
+        return 10;
+    return static_cast<int>(m_rank);    //else return rank value of numbers which starts from 1 in Rank enum class
 }

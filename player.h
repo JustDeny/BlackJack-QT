@@ -16,15 +16,21 @@ public:
     virtual void hit();
     virtual ~Player() = default;
     void Init();
+    int getScore();
+    void addScore(const Card& card);
+    int getBalance() const;
+    void Reset();
+    void setBalance(int newBalance);
+
 protected:
     QList<Card> taken_cards;
     int score;
     int balance;
-    int ace_count;
+    int ace_count=0;
     std::shared_ptr<Deck> common_deck;
     std::unique_ptr<QPropertyAnimation> animation;
 private:
-    const QPoint player_deck_pos = QPoint(80,300); //it's where first card will be placed and acordingly next ones will be in line
+    const QPoint player_deck_pos = QPoint(200,300); //it's where first card will be placed and acordingly next ones will be in line
 };
 
 #endif // PLAYER_H

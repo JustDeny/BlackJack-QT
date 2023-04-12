@@ -14,6 +14,7 @@ SOURCES += \
     deck.cpp \
     gamewindow.cpp \
     main.cpp \
+    menu.cpp \
     player.cpp
 
 HEADERS += \
@@ -21,6 +22,7 @@ HEADERS += \
     dealer.h \
     deck.h \
     gamewindow.h \
+    menu.h \
     player.h
 
 FORMS +=

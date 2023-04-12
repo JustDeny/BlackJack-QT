@@ -31,12 +31,31 @@ void Dealer::hit()
     int shift = 30;
 
     animation->setEndValue(offset);
-//    QObject::connect(animation.get(), &QPropertyAnimation::finished, [&](){
-//        animation->stop();
-//    });
     QEventLoop loop;
     QObject::connect(animation.get(), &QPropertyAnimation::finished, &loop, &QEventLoop::quit);
     animation->start();
 
     loop.exec();
+}
+
+void Dealer::Init()
+{
+    Player::Init();
+    taken_cards.last().setFaceUp(true);
+    score = taken_cards.last().getCardValue();
+}
+
+void Dealer::RevealCard()
+{
+    taken_cards.first().setFaceUp(true);
+    score+=taken_cards.first().getCardValue();
+}
+
+void Dealer::getAdditionalCards()
+{
+    while(score<17){
+        hit();
+        taken_cards.last().setFaceUp(true);
+        score+=taken_cards.last().getCardValue();
+    }
 }

@@ -5,7 +5,7 @@
 #include <iostream>
 
 enum class Suit:int { Clubs, Diamonds, Hearts, Spades };
-enum class Rank: int { Ace, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King };
+enum class Rank: int { Ace=1, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King };
 
 class Card : public QLabel
 {
@@ -26,20 +26,23 @@ class Card : public QLabel
        Suit suit() const;
        Rank rank() const;
        bool isFaceUp() const;
+       bool isAce()const;
 
        static QPixmap getCardImage(Suit suit, Rank rank);
 
        int getCardWidth() const;
        int getCardHeight() const;
+       int getCardValue() const;
 
 private:
        Suit m_suit;
        Rank m_rank;
        bool m_faceUp;
        QPixmap frontTexture;
+       QPixmap backTexture;
        int card_width;
        int card_height;
-       //QPixmap BackTexture;
+       bool is_ace;
 };
 
 #endif // CARD_H
