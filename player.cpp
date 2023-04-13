@@ -9,16 +9,14 @@ Player::Player(QWidget* parent, std::shared_ptr<Deck> deck):
 {
     taken_cards.reserve(10);
     animation->setPropertyName("pos");
+    card_sound.setSource(QUrl::fromLocalFile("../BlackJack/sounds/card_move_sound.wav"));
 }
 
 void Player::hit()
 {
-    QPoint offset;
-    if(taken_cards.isEmpty())
+    QPoint offset = player_deck_pos;
+    if(!taken_cards.isEmpty())
     {
-        offset = player_deck_pos;
-    }
-    else{
         offset = taken_cards.last().geometry().topRight();
     }
     int shift = 30;
@@ -28,7 +26,6 @@ void Player::hit()
     Card& target = taken_cards.last();
     addScore(target);
     target.show();
-
     animation->setTargetObject(&target);
     animation->setDuration(300);
     animation->setStartValue(target.pos());
@@ -37,12 +34,15 @@ void Player::hit()
     QEventLoop loop;
     QObject::connect(animation.get(), &QPropertyAnimation::finished, &loop, &QEventLoop::quit);
     animation->start();
+    card_sound.play();
     loop.exec();
+
     target.setFaceUp(true);
 }
 
 void Player::Init()
 {
+    //taking two cards
     hit();
     hit();
 }
@@ -93,8 +93,7 @@ void Player::Reset()
     ace_count=0;
     for (int i = 0; i<taken_cards.count();i++) {
         taken_cards[i].setFaceUp(false);
-        taken_cards[i].move(common_deck->getDeck_pos());
-        //taken_cards[i].hide();
+        taken_cards[i].move(common_deck->getDeckPos());
         common_deck->AddCard(taken_cards[i]);
     }
     taken_cards.clear();

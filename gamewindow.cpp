@@ -14,28 +14,50 @@ int GameWindow::getHeight() const
     return W_HEIGHT;
 }
 
-void GameWindow::setMenu(Menu &menu)
+Player &GameWindow::getPlayer()
 {
+    return player;
 }
 
-void GameWindow::loadImages()
+void GameWindow::setCurrentBet(int bet)
 {
-    m_backgroundImage.load("../BlackJack/images/background.jpg");
+    current_bet = bet;
+}
 
+void GameWindow::loadResources()
+{
+    m_background_pixmap.load("../BlackJack/images/background.jpg");
+    background_sound.setSource(QUrl::fromLocalFile("../BlackJack/sounds/background_sound.wav"));
+    button_sound.setSource(QUrl::fromLocalFile("../BlackJack/sounds/button_sound.wav"));
+}
+
+QSoundEffect &GameWindow::getButtonSound()
+{
+    return button_sound;
 }
 
 GameWindow::GameWindow(QWidget *parent)
-    : QWidget{parent}, deck{std::make_shared<Deck>(this)}, player{this,deck},
-      dealer{this,deck}, hit_button{"Hit",this}, stand_button{"Stand", this}, player_score_label{this},
-      dealer_score_label{this}, result_label{this}, menu{W_WIDTH,W_HEIGHT,this}
+    : QWidget{parent}, m_background(this), deck{std::make_shared<Deck>(this)},
+      hit_button{"Hit",this}, stand_button{"Stand", this}, player_score_label{this}, dealer_score_label{this},
+      result_label{this}, player_balance{this}, player{this,deck}, dealer{this,deck},menu{W_WIDTH,W_HEIGHT,this}
 {
     resize(W_WIDTH,W_HEIGHT);
-    loadImages();
-    hit_button.setFixedSize(70,30);
-    hit_button.move(520,250);
-    stand_button.setFixedSize(70,30);
-    stand_button.move(610,250);
-    timer.setInterval(500);
+    m_background.resize(W_WIDTH,W_HEIGHT);
+    loadResources();
+    m_background.setPixmap(m_background_pixmap);
+    //m_background.show();
+    hit_button.setFixedSize(BUTTON_WIDTH,BUTTON_HEIGHT);
+    hit_button.move(HIT_BUTTON_POS);
+    stand_button.setFixedSize(BUTTON_WIDTH,BUTTON_HEIGHT);
+    stand_button.move(STAND_BUTTON_POS);
+
+    timer.setInterval(500); //0.5sec delay for buttons
+
+    background_sound.setLoopCount(QSoundEffect::Infinite);
+    background_sound.setVolume(0.1f);
+    background_sound.play();
+    background_sound.setVolume(0.25f);
+
 
     connect(&hit_button, &QPushButton::clicked, this, &GameWindow::onHitButtonClicked);
     connect(&stand_button, &QPushButton::clicked, this, &GameWindow::onStandButtonClicked);
@@ -44,54 +66,48 @@ GameWindow::GameWindow(QWidget *parent)
 
 void GameWindow::waitUserClick()
 {
+    QEventLoop m_eventLoop;
     connect(this, &GameWindow::mSignalTriggered, &m_eventLoop, &QEventLoop::quit);
     m_eventLoop.exec();
 }
+
 void GameWindow::mousePressEvent(QMouseEvent *event)
 {
     QWidget::mousePressEvent(event);
     emit mSignalTriggered();
 }
+
 GameWindow &GameWindow::getInstance()
 {
     static GameWindow instance;
     return instance;
 }
 
-void GameWindow::showMenu() {
-    this->hide();
-}
-void GameWindow::hideMenu() {
-    this->show();
-}
-
 void GameWindow::Init()
 {
-    player_score_label.move(170,270);
-    dealer_score_label.move(900,270);
+    player_score_label.move(PLAYER_SCORE_LABEL_POS);
+    dealer_score_label.move(DEALER_SCORE_LABEL_POS);
+    player_balance.move(BALANCE_POS);
     player_score_label.setFixedSize(30,30);
     dealer_score_label.setFixedSize(30,30);
+    player_balance.setFixedSize(200,50);
+
     InitUI();
+
     player.Init();
     dealer.Dealer::Init();
-    player_score_label.setText(QString::number(player.getScore()));
-    dealer_score_label.setText(QString::number(dealer.getScore()));
+    updateUI();
+
     if(player.getScore()>=21)
         DetermineWinner();
-}
-
-void GameWindow::Draw()
-{
-    QPainter qp(this);          // I'd like to make it as shared_ptr but it must be created only in this event func
-    qp.drawImage(0,0,m_backgroundImage);
-    //deck->Draw(qp);
-
 }
 
 void GameWindow::updateUI()
 {
     player_score_label.setText(QString::number(player.getScore()));
     dealer_score_label.setText(QString::number(dealer.getScore()));
+    player_balance.setText("Balance: "+QString::number(player.getBalance())+"$;\
+ Current bet: "+QString::number(current_bet)+"$");
 }
 
 void GameWindow::InitUI()
@@ -102,19 +118,20 @@ void GameWindow::InitUI()
     player_score_label.setStyleSheet("QLabel { color: white; }");
     dealer_score_label.setFont(font);
     dealer_score_label.setStyleSheet("QLabel { color: white; }");
+
     hit_button.setStyleSheet("QPushButton {""background-color: transparent; border: 4px solid white; border-radius: 5px; \
     color: white;} QPushButton:hover { background-color: rgba(255, 255, 255, 0.2); }QPushButton:pressed {\
     background-color: rgba(255, 255, 255, 0.4);}");
     hit_button.setFont(font);
-    stand_button.setStyleSheet("QPushButton {""background-color: transparent; border: 4px solid white; border-radius: 5px; \
-    color: white;} QPushButton:hover { background-color: rgba(255, 255, 255, 0.2); }QPushButton:pressed {\
-    background-color: rgba(255, 255, 255, 0.4);}");
+
+    stand_button.setStyleSheet(hit_button.styleSheet());
     stand_button.setFont(font);
+
     result_label.setAlignment(Qt::AlignCenter);
 
-    int labelX = (width() - 100) / 2;
+    int labelX = (width() - 300) / 2;
     int labelY = (height()) / 2;
-    result_label.setGeometry(labelX, labelY, 100, 50);
+    result_label.setGeometry(labelX, labelY, 300, 50);
     font.setPixelSize(25);
     result_label.setFont(font);
     result_label.setStyleSheet("QLabel { color: white; }");
@@ -127,11 +144,14 @@ void GameWindow::DetermineWinner()
     updateUI();
     int player_score = player.getScore();
     int dealer_score = dealer.getScore();
+    bool isPlayerWon = false;
     if(player_score == dealer_score){
         result_label.setText("Draw");
+        player.setBalance(player.getBalance()+current_bet);
     }
     else if(player_score == 21){
         result_label.setText("Win");
+        isPlayerWon = true;
     }
     else if (dealer_score == 21){
         result_label.setText("Loose");
@@ -142,6 +162,7 @@ void GameWindow::DetermineWinner()
     }
     else if (dealer_score > 21) {
         result_label.setText("Win");
+        isPlayerWon = true;
     }
     else if(player_score < 21 && dealer_score<21&& player_score < dealer_score )    //dealer closer to 21
     {
@@ -150,7 +171,10 @@ void GameWindow::DetermineWinner()
     else if (player_score < 21 && dealer_score<21&&player_score >dealer_score)      //player closer to 21
     {
         result_label.setText("Win");
+        isPlayerWon = true;
     }
+    if(isPlayerWon)
+        player.setBalance(player.getBalance()+current_bet*2);
     waitUserClick();
     ResetCurrentGame();
     menu.show();
@@ -160,6 +184,7 @@ void GameWindow::ResetCurrentGame()
 {
     player.Reset();
     dealer.Reset();
+    current_bet = 0;
     result_label.clear();
     updateUI();
     deck->Shuffle();
@@ -174,19 +199,15 @@ void GameWindow::FullResetGame()
 
 void GameWindow::onHitButtonClicked()
 {
+    button_sound.play();
     timer.start();
 }
 
 void GameWindow::onStandButtonClicked()
 {
+    button_sound.play();
     updateUI();
     DetermineWinner();
-}
-
-void GameWindow::paintEvent(QPaintEvent *e)
-{
-    Q_UNUSED(e);
-    Draw();
 }
 
 void GameWindow::timerTimeout()

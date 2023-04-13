@@ -15,15 +15,9 @@ Deck::Deck(QWidget* parent)
     Shuffle();
 }
 
-void Deck::Draw(QPainter& qp)
-{
-}
-
 Card Deck::TakeCard()
 {
-    if(!cards.empty())
-        return cards.takeLast();
-    return Card{nullptr};
+    return cards.takeLast();
 }
 
 void Deck::Shuffle()
@@ -43,7 +37,7 @@ void Deck::Shuffle()
       }
 }
 
-QPoint Deck::getDeck_pos() const
+QPoint Deck::getDeckPos() const
 {
     return deck_pos;
 }

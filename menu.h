@@ -15,9 +15,8 @@ private:
     QPushButton ng_button;
     QPushButton continue_button;
     QPushButton exit_button;
-    QAction ng_action;
-    QAction continue_action;
-    QAction exit_action;
+    QPixmap backgroundPixmap;
+    void loadTextures();
 public:
     explicit Menu(int width, int height, QWidget *parent = nullptr);
 public slots:

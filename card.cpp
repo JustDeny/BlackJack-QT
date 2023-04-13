@@ -10,19 +10,16 @@ Card::Card(QWidget *parent)
 Card::Card(Suit suit, Rank rank,QPoint pos, QWidget *parent) :
     QLabel(parent), m_suit(suit), m_rank(rank), m_faceUp(false)
 {
-    frontTexture = getCardImage(suit, rank);
-    backTexture.load("../BlackJack/images/cards/backcard.png");
-    backTexture= backTexture.scaled(backTexture.width() * 1.5, backTexture.height() * 1.5,Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    setPixmap(backTexture);
+    loadTextures();
+    setPixmap(backTexture); //card rotated by default
     card_width = pixmap().width();
     card_height = pixmap().height();
     move(pos);
     setStyleSheet("border: 1px solid grey");
     is_ace = rank==Rank::Ace?true:false;
-    QWidget qw;
-
 }
 
+//looks weird but QLabel does have deleted copy/move contructors
 Card::Card(const Card &other)
 {
     *this = other;
@@ -39,14 +36,24 @@ Card &Card::operator=(const Card &other)
     setText(other.text());
     m_suit=other.m_suit;
     m_rank = other.m_rank;
+
     m_faceUp = other.m_faceUp;
     frontTexture = other.frontTexture;
     backTexture = other.backTexture;
     setPixmap(backTexture);
+
     card_width= other.card_width;
     card_height=other.card_height;
     move(other.pos());
     is_ace=other.is_ace;
+}
+
+void Card::loadTextures()
+{
+    frontTexture = getCardImage(m_suit, m_rank);
+    backTexture.load("../BlackJack/images/cards/backcard.png");
+    backTexture= backTexture.scaled(backTexture.width() * 1.5, backTexture.height() * 1.5,Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
 }
 
 void Card::setSuit(Suit suit)
@@ -74,11 +81,6 @@ void Card::setFaceUp(bool faceUp)
     m_faceUp = faceUp;
 }
 
-const QPixmap Card::getFrontTexturePixmap() const
-{
-    return frontTexture;
-}
-
 bool Card::isAce() const
 {
     return is_ace;
@@ -103,57 +105,58 @@ QPixmap Card::getCardImage(Suit suit, Rank rank)
                 suitStr = "s";
                 break;
             default:
-                std::cerr << "Invalid suit argument\n";
+                qDebug() << "Invalid suit argument\n";
                 break;
         }
 
-        switch (rank) {
-            case Rank::Ace:
-                rankStr = "a";
-                break;
-            case Rank::Two:
-                rankStr = "2";
-                break;
-            case Rank::Three:
-                rankStr = "3";
-                break;
-            case Rank::Four:
-                rankStr = "4";
-                break;
-            case Rank::Five:
-                rankStr = "5";
-                break;
-            case Rank::Six:
-                rankStr = "6";
-                break;
-            case Rank::Seven:
-                rankStr = "7";
-                break;
-            case Rank::Eight:
-                rankStr = "8";
-                break;
-            case Rank::Nine:
-                rankStr = "9";
-                break;
-            case Rank::Ten:
-                rankStr = "10";
-                break;
-            case Rank::Jack:
-                rankStr = "j";
-                break;
-            case Rank::Queen:
-                rankStr = "q";
-                break;
-            case Rank::King:
-                rankStr = "k";
-                break;
-            default:
-                std::cerr << "Invalid rank argument\n";
-                break;
-        }
+    switch (rank) {
+        case Rank::Ace:
+            rankStr = "a";
+            break;
+        case Rank::Two:
+            rankStr = "2";
+            break;
+        case Rank::Three:
+            rankStr = "3";
+            break;
+        case Rank::Four:
+            rankStr = "4";
+            break;
+        case Rank::Five:
+            rankStr = "5";
+            break;
+        case Rank::Six:
+            rankStr = "6";
+            break;
+        case Rank::Seven:
+            rankStr = "7";
+            break;
+        case Rank::Eight:
+            rankStr = "8";
+            break;
+        case Rank::Nine:
+            rankStr = "9";
+            break;
+        case Rank::Ten:
+            rankStr = "10";
+            break;
+        case Rank::Jack:
+            rankStr = "j";
+            break;
+        case Rank::Queen:
+            rankStr = "q";
+            break;
+        case Rank::King:
+            rankStr = "k";
+            break;
+        default:
+            qDebug() << "Invalid rank argument\n";
+            break;
+    }
     QString filename = "../BlackJack/images/cards/"+rankStr+"_"+suitStr+".png";
     QPixmap pixmap;
-    pixmap.load(filename);
+    if(!pixmap.load(filename))
+        qDebug()<< "Could not load card pixmap\n";
     pixmap = pixmap.scaled(pixmap.width() * 1.5, pixmap.height() * 1.5,Qt::KeepAspectRatio, Qt::SmoothTransformation);
     return pixmap;
 }
@@ -175,5 +178,7 @@ int Card::getCardValue() const
     }
     if(static_cast<int>(m_rank) > static_cast<int>(Rank::Ten))
         return 10;
-    return static_cast<int>(m_rank);    //else return rank value of numbers which starts from 1 in Rank enum class
+    return static_cast<int>(m_rank);    //else return rank value of numbers
 }
+
+

@@ -24,7 +24,6 @@ void Dealer::hit()
     taken_cards.append(common_deck->TakeCard());
     Card& target = taken_cards.last();
     target.show();
-
     animation->setTargetObject(&target);
     animation->setDuration(300);
     animation->setStartValue(target.pos());
@@ -34,6 +33,7 @@ void Dealer::hit()
     QEventLoop loop;
     QObject::connect(animation.get(), &QPropertyAnimation::finished, &loop, &QEventLoop::quit);
     animation->start();
+    card_sound.play();
 
     loop.exec();
 }

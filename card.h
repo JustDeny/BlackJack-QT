@@ -2,7 +2,6 @@
 #define CARD_H
 
 #include <QLabel>
-#include <iostream>
 
 enum class Suit:int { Clubs, Diamonds, Hearts, Spades };
 enum class Rank: int { Ace=1, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King };
@@ -20,8 +19,6 @@ class Card : public QLabel
        void setSuit(Suit suit);
        void setRank(Rank rank);
        void setFaceUp(bool faceUp);
-
-       const QPixmap getFrontTexturePixmap()const;
 
        Suit suit() const;
        Rank rank() const;
@@ -43,6 +40,7 @@ private:
        int card_width;
        int card_height;
        bool is_ace;
+       void loadTextures();
 };
 
 #endif // CARD_H
