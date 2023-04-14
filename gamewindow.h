@@ -58,7 +58,6 @@ private:
 public:
     static GameWindow& getInstance();
     void Init();
-    //void Draw();
     void updateUI();
     void InitUI();
     void DetermineWinner();
@@ -74,7 +73,7 @@ public slots:
     void onStandButtonClicked();
     void timerTimeout();
 signals:
-    void mSignalTriggered();
+    void mSignalTriggered();    //signal to be emited to stop qevent loop
 protected:
     //void paintEvent(QPaintEvent *e) override;
     void mousePressEvent(QMouseEvent *event) override;

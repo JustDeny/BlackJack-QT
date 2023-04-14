@@ -27,7 +27,23 @@ Card::Card(const Card &other)
 
 Card::Card(Card &&other)
 {
-    *this = other;
+    setParent(other.parentWidget());
+    setText(other.text());
+    m_suit=other.m_suit;
+    m_rank = other.m_rank;
+
+    m_faceUp = other.m_faceUp;
+    frontTexture = std::move(other.frontTexture);
+    backTexture = std::move(other.backTexture);
+    if(other.isFaceUp())
+        setPixmap(frontTexture);
+    else
+        setPixmap(backTexture);
+    show();
+    card_width= other.card_width;
+    card_height=other.card_height;
+    move(other.pos());
+    is_ace=other.is_ace;
 }
 
 Card &Card::operator=(const Card &other)
@@ -40,8 +56,11 @@ Card &Card::operator=(const Card &other)
     m_faceUp = other.m_faceUp;
     frontTexture = other.frontTexture;
     backTexture = other.backTexture;
-    setPixmap(backTexture);
-
+    if(other.isFaceUp())
+        setPixmap(frontTexture);
+    else
+        setPixmap(backTexture);
+    show();
     card_width= other.card_width;
     card_height=other.card_height;
     move(other.pos());
@@ -79,6 +98,11 @@ void Card::setFaceUp(bool faceUp)
         setPixmap(backTexture);
     }
     m_faceUp = faceUp;
+}
+
+bool Card::isFaceUp() const
+{
+    return m_faceUp;
 }
 
 bool Card::isAce() const

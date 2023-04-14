@@ -7,7 +7,7 @@ Player::Player(QWidget* parent, std::shared_ptr<Deck> deck):
     score{0}, balance{1500}, ace_count{0}, common_deck{deck},
     animation{std::make_unique<QPropertyAnimation>()}
 {
-    taken_cards.reserve(10);
+    //taken_cards.reserve(10);
     animation->setPropertyName("pos");
     card_sound.setSource(QUrl::fromLocalFile("../BlackJack/sounds/card_move_sound.wav"));
 }
@@ -36,7 +36,9 @@ void Player::hit()
     animation->start();
     card_sound.play();
     loop.exec();
-
+    for (auto& card : taken_cards) {
+        card.show();
+    }
     target.setFaceUp(true);
 }
 
